@@ -39,7 +39,7 @@ It is highly recommended to have at least two distributions from both **RPM** & 
 
 ![Click on Finish](./screenshots/rpm-lab-creation/6-finish.png)
 
-- 8- Now that you can see your VM on the left sidebar, select it and press the **Start** button or double click on it to run fedora. ( if you got an error starting the VM, you might want to see the last section on this page: **Disable KVM** )
+- 8- Now that you can see your VM on the left sidebar, select it and press the **Start** button or double click on it to run fedora. ( if you're using an Intel proccessor and got an error starting the VM, you might want to see the last section on this page: **Disable KVM** )
 
 ![Start VM](./screenshots/rpm-lab-creation/6-1-start-vm.png)
 
@@ -76,7 +76,7 @@ It is highly recommended to have at least two distributions from both **RPM** & 
 
 - 7- Create a Virtual Disk with minimum size of **8GB**s, then click on next until finished.
 
-- 8- Now that you can see your VM on the left sidebar, select it and press the **Start** button or double click on it to start Ubuntu. ( if you got an error starting the VM, you might want to see the last section on this page: **Disable KVM** )
+- 8- Now that you can see your VM on the left sidebar, select it and press the **Start** button or double click on it to start Ubuntu. ( if you're using an Intel proccessor and got an error starting the VM, you might want to see the last section on this page: **Disable KVM** )
 
 - 9- From now on it is straight-forward, select your language and click next with default settings until you see **Profile Configuration** page.
 
