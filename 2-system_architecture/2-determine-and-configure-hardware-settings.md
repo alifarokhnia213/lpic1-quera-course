@@ -109,3 +109,222 @@ Some typical PCI devices:
 ![GPIO pins](./screenshots/101.1/part1/7-gpio-pins.png)
 
 **This** is more *electronics/embedded* world than normal desktop computing.
+
+---
+
+### 101.1 - Part 2 =>
+
+**In** previous part we got more familiar with hardware and firmware, but in this part we will discuss about the way that Linux recognizes and communicates with hardware as an OS. to achieve this we need to observe four important systems:
+- 1- Pseudo or (Virtual) file system: **SysFs**.
+- 2- User space manager: **Udev**.
+- 3- Dbus System.
+- 4- /proc directory.
+
+## Sysfs
+**Is** a pseudo filesystem, provided by the Linux Kernel that exports information about various Kernel subsystems, hardware devices and associated device drivers from the Kernel's device model to user space through virtual files. **in addition** to providing information about various devices and kernel subsystems, exported virtual files are also used for their configuration.
+
+
+**SysFs** is mounted under the **/sys** mountpoint:
+
+![sysfs mountpoint](./screenshots/101.1/part2/1-sysfs-mountpoint.png)
+
+All block devices are at "/block", and "/bus" has all the connected **PCI, USB, Serial** and etc. Note that here in "/sys" we have the devices based on their technology, but in "/dev" it is abstracted:
+
+- `/sys/block`:
+
+![sysfs block devs](screenshots/101.1/part2/4-block-devices.png)
+
+- `/sys/devices`:
+
+![sysfs buses and drivers and etc](screenshots/101.1/part2/5-hardware-buses-drivers-etc.png)
+
+- `/sys/bus`:
+
+![sysfs bus directory](screenshots/101.1/part2/13-sys-bus-dir.png)
+
+**When** we say "sysfs" is a virtual file system exported by kernel we mean:
++ The files we see under "/sys" are not actually stored on disk and are instead generated dynamically by the Linux kernel in RAM and is basically a live interface into kernel objects & device state.
++ A real filesystem stores persistent data on a storage device, for example: ext4, XFS, NTFS.
++ Pseudo filesystems are different, they are mostly: *kernel interfaces, temporary runtime data, abstractions, communication channels...* and this means no actual disk is involved.
+
+### What "SysFs" actually does?
+Sysfs exposes Kernel objects as files, for example these represent:
+
+- "/sys/class/net/" : Network interfaces.
+- "/sys/block/" : Block devices.
+- "/sys/devices/" : Hardware buses, drivers....
+
+For example when we run:
+
+```bash
+$ cat /sys/class/net/eth0/mtu
+```
+We are not actually reading a disk file, instead:
++ 1- The kernel receives the read request.
++ 2- A kernel function generates the value.
++ 3- The value is returned as a text.
+
+So the file is really like an API endpoint disguised as a file.
+
+#### Why Linux does this?
+It follows the **Unix** philosophy that says everything is a file, because it gives huge advantages like:
+- Standard tools like "echo", "grep", "cat" works.
+- Easy shell scripting.
+- No special gui/api is needed.
+- **Consistent interface**.
+
+## Udev ( Userspace */dev* )
+**Udev** is also a pseudo file system. Most of the times that we have somthing to do with our devices, we refer to **Udev**.
+
+Udev is a device manager for linux kernel, and as the successor of *devfsd* & hotplug, Udev not only manages devices nodes in **/dev** directory, but also manages all userspace events raised when hardware devices are added into the system or removed from it; including firmware loading as required by certain devices.
+
+**There** are a lot of devices in *"/dev"* shown as files, and if you plug in any device it will be assigned a file for it. example? say */dev/sda* which is a file representing a block device.
+
+![dev directory](screenshots/101.1/part2/6-dev-directory.png)
+
+**Udev** lets you decide what will be what in *"/dev"* directory. for example? you can use a rule to force your flash drive with a specific vendor to appear as *"/dev/mybackups"* when you plug it in. you can even start and set a back process as soon as it connects to the system.
+
+**In essence** Udev serves as a custodian of the *"/dev"* directory. it abstracts the representation of devices such as hard disk which is identified as "*/dev/sda*" or "*/dev/hd0*", **Irrespective of its manufacturer model or underlaying technology**
+
+### Why Udev?
+**Udev** exists so that programs can interact with devices through consistent files in *"/dev"*, instead of dealing directly with the details of each hardware technology.
+
+#### When a device appears:
+- The Kernel detects it.
+- The Kernel exposes information about it.
+- Udev creates the appropriate file in *"/dev"*.
+- Programs use that file to access that device.
+
+*this way software doesn't need to be specifically programmed to able to work with different devices, but they can communicate through a standard interface* ( files in *"/dev"* ). It dynamically manages device files, providing a consistent way for Linux and Applications to access hardware. this is the opposite way that *"/sys"* does which is sorting devices based on a certain and hierarchy.
+
+## D-bus
+**Is** an IPC ( Inter Process Communication ) system which allows programs to have a simple & reliable way of communication between eachother.
+
+#### Three of most important services provided by this system are:
+- Is a message bus system for inter process communication and displacement of data & messages between programs.
+- Helps coordinate process lifecycle.
+- Makes it simple and reliable to code a single instance application or daemon and to launch applications and daemons on-demand when their services are needed.
+
+#### A short summery about D-Bus ( Desktop-Bus ) system:
+**D-Bus** is a modern and high speed messaging system that allows applications and services on Linux to easily communicate with eachother. think of it as a post office for programs. instead of applications directly communicate with each other they send messages through D-Bus.
+
+**D-Bus runs two main buses:**
+- The system bus: for system-wide services like NetworkManager, Systemd and Hardware devices.
+- The session bus: for user application and desktop environment.
+
+**D-Bus** is heavily used in modern Linux desktops and is essential for features like:
+- Notifications
+- Power Management
+- Service Control
+
+## Proc directory
+**This** is where Linux Kernel keeps its settings & properties. this directory is also a pseudo file system and is created on RAM and some files there might have write access ( say some for hardware configuration ).
+
+**Proc** provides an interface for to Kernel data structures, this way you can see system status in essence, and tools like **ps** and other tools can query data about Kernel and processes, about their Pid, user, current working directory, memory and etc.
+
+! Sys was introduced later to address the mess that proc became. **Sysfs** is more structured and organized around the Kernel's device model. it reflects the hierarchy of devices, buses, drivers and Kernel objects.
+
+### Proc vs Sysfs:
+
+**/proc**: What is Kernel and System doing now?
+- Processes
+- Memory
+- CPU info
+- Kernel settings
+
+**/sys**: What hardware devices exists and how are they organized?
+- Disks
+- Network cards
+- USB devices
+- Drivers
+- Device attributes
+
+### What **Proc** & **Sysfs** have in common?
+They both are Pseudo file systems and the files aren't actually stored on Disks, and Kernel generates their content dynamically.
+
+### in *"/proc"* directory you can find things like:
+- IRQs: interrupt requests.
+- I/O ports: Locations in memory Where CPU can talk with devices.
+- DMA: direct memory access, faster than I/O ports.
+- Processes
+- Network settings
+
+**In** "/proc" you can see many numbers as directories; these numbers are the process IDs, also there are other files like **cpuinfo**, **mounts**, **meminfo**, **net**, **interrupts** which are used to observe hardware info and system status.
+
+![proc directory](screenshots/101.1/part2/7-proc-directory.png)
+
+**You** can also do some limited configurations in proc; for example if you've got an IBM Lenovo laptop you can turn on/off or even blinking the LEDs on laptop. example:
+```bash
+$ echo "10 blink" | tee /proc/acpi/ibm/led
+
+# in this example, 10 represents my red led on the back of the laptop lid,
+# and blink is the condition i want it to have which is blinking.
+``` 
+
+**Another** very useful directory here is ``/proc/sys/net/ipv4`` which controls real-time networking configuration.
+
+![proc sys net ipv4](screenshots/101.1/part2/8-proc-sys-net-ipv4.png)
+
+**! Attention**: all the changes will be reverted after a reboot. to make it permanent, you have to configure them in `/etc` directory. 
+
+### IRQ ( Interrupt request ):
+**Is** a mechanism used by hardware devices to signal the CPU that they require immediate attention. so instead of CPU constantly checking and polling devices to see if they need processing, an IRQ allows the device to interrupt the processor, **triggering the Kernel's interrupt handler** for that specific device. each device is assigned an IRQ number *(or uses message signaled interrupts in modern systems)*. proper IRQ handling is essential for system performance & responsiveness.
+
+**In Linux** you can monitor IRQ activity using `/proc/interrupts`. understanding IRQs is a fundamental part of Linux hardware management & System architecture.
+
+### Some directories that are good to know about:
+- `/proc/interrupts`:
+
+![proc interrupts](screenshots/101.1/part2/9-proc-interrupts.png)
+  
+  1- Useful to see which devices are using which IRQs & to diagnose interrupt related issues.
+
+  2- Lists all IRQs currently used by Hardware devices.
+
+  3- Display how many times each interrupt occurred per CPU core.
+
+- `/proc/ioports`:
+
+![proc ioports](screenshots/101.1/part2/10-proc-ioports.png)
+
+  1- Lists I/O ports addresses assigned to hardware devices.
+
+  2- I/O ports are used for communication between CPU & Devices ( Older method ).
+
+  3- Shows the range of ports & the device and drivers that are using them.
+
+- `/proc/iomem`:
+
+![proc iomem](screenshots/101.1/part2/11-proc-iomem.png)
+
+  1- Displays I/O memory ( Memory mapped I/O ) regions assigned to devices.
+
+  2- Shows physical memory addresses used by hardware devices ( e.g. Network cards, graphics, PCI devices )
+
+  3- Important for understanding how devices map their memory into the system's address space.
+
+- `/proc/dma`:
+
+![proc dma](screenshots/101.1/part2/12-proc-dma.png)
+
+  1- Shows direct-memory-access ( DMA ) channels currently in use.
+
+  2- DMA helps devices to transfer data directly to/from RAM without involving the CPU ( performance improve ).
+
+  3- Most modern systems show very little here because they use **Bus Mastering** instead of traditional DMA channels.
+
+### Quick Proc Summarize:
+the `/proc` file system provides useful information about hardware resource allocation.
+
+**"Interrupts"** shows IRQ usage & statistics. 
+
+**"ioports"** displays I/O port ranges.
+
+**"iomem"** shows memory mapped I/O regions.
+
+**"dma"** shows direct-memory-access channels.
+
+---
+
+### 101.1 - Part 3 =>
+
