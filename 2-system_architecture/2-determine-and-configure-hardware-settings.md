@@ -1,4 +1,4 @@
-# 101.1 Determine and Configure Hardware Settings
+# Section 101.1-Determine and Configure Hardware Settings
 **LPIC** starts from the hardest part, knowing how to install, configure partitions and detect hardware is from those sort of things that even some pro users don't know how to do it without outside help. in 70% of times, even if you're super professional, you don't deal with hardware.
 
 ### Section 101.1 Objectives:
@@ -14,6 +14,39 @@
 - **modprobe**
 - **lsmod, lspci, lsusb**
 
+# Table of Contents
+
+- [101.1 Determine and Configure Hardware Settings](#section-1011-determine-and-configure-hardware-settings)
+  - [Section 101.1 Objectives](#section-1011-objectives)
+
+### 101.1 - Part 1
+- [Operating System (OS)](#operating-system-os)
+- [Firmware](#firmware)
+  - [BIOS (Basic Input/Output System)](#bios)
+  - [UEFI (Unified Extensible Firmware Interface)](#uefi)
+- [Hardware](#hardware)
+  - [Peripheral Devices](#peripheral-devices)
+  - [PCI (Peripheral Component Interconnect)](#pci)
+  - [USB (Universal Serial Bus)](#usb)
+  - [GPIO (General Purpose Input/Output)](#gpio)
+
+### 101.1 - Part 2
+- [Sysfs](#sysfs)
+  - [Sysfs Structure and Key Directories](#sysfs-structure-and-key-directories)
+  - [What Sysfs Actually Does](#what-sysfs-actually-does)
+- [Udev (Userspace /dev)](#udev)
+- [D-Bus](#d-bus)
+- [Proc Directory](#proc-directory)
+  - [Proc vs Sysfs](#proc-vs-sysfs)
+  - [Key Files and Directories in /proc](#key-files-and-directories-in-proc)
+  - [IRQ (Interrupt Request)](#irq)
+  - [Important /proc Sub-directories](#some-directories-that-are-good-to-know-about)
+    - [/proc/interrupts](#procinterrupts)
+    - [/proc/ioports](#procioports)
+    - [/proc/iomem](#prociomem)
+    - [/proc/dma](#procdma)
+  - [Quick Proc Summary](#quick-proc-summary)
+
 ---
 
 ### 101.1 - Part 1 =>
@@ -28,15 +61,19 @@
 
 **Motherboards** also use a built-in firmware to integrate Hardware ( like detecting sound or network card ).
 
-### BIOS *( Basic input/output system )*
+### BIOS 
+
+*( Basic input/output system )*
 **Is** one of those old firmwares, in which you could do some limited settings and configurations from a *text-based* menu system and boot the computer from the bootloader which was located on the first sector of the first partition of the hard disk and was called **MBR** or ( *Master-Boot-Record* ). 
 
 ![BIOS](./screenshots/101.1/part1/2-bios.png)
 
 Nowadays most of the new systems use a 2-step procedure for boot, because MBR alone doesn't have enough space to store modern bootloaders; so what they do is to load the MBR into memory for **addressing** the cpu to the main bootloader.
 
-### UEFI *( Unified Extensible Firmware Interface )*
-**It** is newer, fancier and the standard firmware interface for nowadays modern systems; first it was started started as **EFI** in 1998 by Intel corp to make the booting process more secure and flexible. in this interface we have to register each bootloader; it uses a specific disk partition which is called ( EFI system partition *(ESP)* ) with **FAT** disk format which stands for (*File Allocation Table*) which doesn't have **MBR** size limit.
+### UEFI 
+
+*( Unified Extensible Firmware Interface )*
+**It** is newer, fancier and the standard firmware interface for nowadays modern systems; first it was started as **EFI** in 1998 by Intel corp to make the booting process more secure and flexible. in this interface we have to register each bootloader; it uses a specific disk partition which is called ( EFI system partition *(ESP)* ) with **FAT** disk format which stands for (*File Allocation Table*) which doesn't have **MBR** size limit.
 
 ![UEFI](./screenshots/101.1/part1/3-uefi.png)
 
@@ -67,7 +104,9 @@ examples of Peripheral Devices:
 - Video Accelerators. for faster Graphical rendering. 
 - Audio cards.
 
-### PCI *( Peripheral Component Interconnect )*
+### PCI 
+
+*( Peripheral Component Interconnect )*
 **Was** a workaround to let users to add different Hardware boards and pieces to their computers flexibly, so they weren't forced to change the Motherboard entirely for a tiny Hardware upgrade like for example adding 2GBs memory space to their system.
 
 ![Peripheral Component Interconnect](./screenshots/101.1/part1/4-pci.png)
@@ -80,7 +119,9 @@ Some typical PCI devices:
 - Wi-Fi Adapters.
 - Capture cards ( captures external sources like a Camera or Game console ).
 
-### USB *( Universal Serial Bus )*
+### USB 
+
+*( Universal Serial Bus )*
 **In** the past, if you needed to connect literally anything to your Motherboard, you had to turn off the system, open up your computer, possibly change your motherboard or connect it via its ports, so you couldn't just do it on the fly when your system was working and etc. so **USB** came up and solved this issue and now you are able to connect many types of external devices via your USB ports to your computer even if it is on work.
 
 ![USB technology Evolution](./screenshots/101.1/part1/5-usb.png)
@@ -90,7 +131,9 @@ Some typical PCI devices:
 - USB v.2: **480** Mbps.
 - USB v.3: **20 Gbps**.
 
-### GPIO *( General Purpose In/Output )*
+### GPIO 
+
+*( General Purpose In/Output )*
 **Using** GPIO ports, we can have different and arbitrary I/Os. though it is not serial and complex protocols cannot work on it like they do on PCI or USB, using its Pins we can directly control electronics. This technology is pretty popular in:
 - Raspberry Pi
 - Micro Controllers
@@ -127,6 +170,8 @@ Some typical PCI devices:
 **SysFs** is mounted under the **/sys** mountpoint:
 
 ![sysfs mountpoint](./screenshots/101.1/part2/1-sysfs-mountpoint.png)
+
+#### Sysfs structure and key directories
 
 All block devices are at "/block", and "/bus" has all the connected **PCI, USB, Serial** and etc. Note that here in "/sys" we have the devices based on their technology, but in "/dev" it is abstracted:
 
@@ -173,8 +218,10 @@ It follows the **Unix** philosophy that says everything is a file, because it gi
 - No special gui/api is needed.
 - **Consistent interface**.
 
-## Udev ( Userspace */dev* )
-**Udev** is also a pseudo file system. Most of the times that we have somthing to do with our devices, we refer to **Udev**.
+## Udev 
+
+( Userspace */dev* )
+**Udev** is a userspace device manager. Most of the times that we have somthing to do with our devices, we refer to **Udev**.
 
 Udev is a device manager for linux kernel, and as the successor of *devfsd* & hotplug, Udev not only manages devices nodes in **/dev** directory, but also manages all userspace events raised when hardware devices are added into the system or removed from it; including firmware loading as required by certain devices.
 
@@ -242,7 +289,7 @@ Udev is a device manager for linux kernel, and as the successor of *devfsd* & ho
 ### What **Proc** & **Sysfs** have in common?
 They both are Pseudo file systems and the files aren't actually stored on Disks, and Kernel generates their content dynamically.
 
-### in *"/proc"* directory you can find things like:
+### Key files and directories in Proc:
 - IRQs: interrupt requests.
 - I/O ports: Locations in memory Where CPU can talk with devices.
 - DMA: direct memory access, faster than I/O ports.
@@ -267,13 +314,15 @@ $ echo "10 blink" | tee /proc/acpi/ibm/led
 
 **! Attention**: all the changes will be reverted after a reboot. to make it permanent, you have to configure them in `/etc` directory. 
 
-### IRQ ( Interrupt request ):
+### IRQ
+
+( Interrupt request )
 **Is** a mechanism used by hardware devices to signal the CPU that they require immediate attention. so instead of CPU constantly checking and polling devices to see if they need processing, an IRQ allows the device to interrupt the processor, **triggering the Kernel's interrupt handler** for that specific device. each device is assigned an IRQ number *(or uses message signaled interrupts in modern systems)*. proper IRQ handling is essential for system performance & responsiveness.
 
 **In Linux** you can monitor IRQ activity using `/proc/interrupts`. understanding IRQs is a fundamental part of Linux hardware management & System architecture.
 
 ### Some directories that are good to know about:
-- `/proc/interrupts`:
+##### `/proc/interrupts`:
 
 ![proc interrupts](screenshots/101.1/part2/9-proc-interrupts.png)
   
@@ -283,7 +332,7 @@ $ echo "10 blink" | tee /proc/acpi/ibm/led
 
   3- Display how many times each interrupt occurred per CPU core.
 
-- `/proc/ioports`:
+##### `/proc/ioports`:
 
 ![proc ioports](screenshots/101.1/part2/10-proc-ioports.png)
 
@@ -293,7 +342,7 @@ $ echo "10 blink" | tee /proc/acpi/ibm/led
 
   3- Shows the range of ports & the device and drivers that are using them.
 
-- `/proc/iomem`:
+##### `/proc/iomem`:
 
 ![proc iomem](screenshots/101.1/part2/11-proc-iomem.png)
 
@@ -303,7 +352,7 @@ $ echo "10 blink" | tee /proc/acpi/ibm/led
 
   3- Important for understanding how devices map their memory into the system's address space.
 
-- `/proc/dma`:
+##### `/proc/dma`:
 
 ![proc dma](screenshots/101.1/part2/12-proc-dma.png)
 
