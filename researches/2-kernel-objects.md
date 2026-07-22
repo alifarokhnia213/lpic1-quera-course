@@ -10,6 +10,14 @@ Sysfs: the virtual file system (/sys) that shows kernel objects to userspace. it
 
 it works together with Udev (which creates devices nodes in /dev) and dbus (for communication between programs).
 
+```
+ls /sys/
+ls /sys/devices/          # hardware devices
+ls /sys/class/            # device classes (net, block, etc.)
+ls /sys/module/           # loaded kernel modules
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq   # current CPU speed
+```
+
 Common Commands related:
 - lspci -> list pci devices.
 - lsusb -> List usb devices.
