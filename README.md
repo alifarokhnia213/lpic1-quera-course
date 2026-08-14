@@ -1,8 +1,8 @@
 # lpic1-quera-course
 
-**Primary Reference:** [linux1st.com](https://linux1st.com)
+**Primary Reference:** [linux1st.com](https://linux1st.com) & LPI Learning Material
 
-These notes are based on the excellent LPIC-1 material from [linux1st.com](https://linux1st.com), supplemented with my own experiments, research, and documentation.
+These notes are based on the excellent LPIC-1 material from [linux1st.com](https://linux1st.com) and LPI Learning Material, supplemented with my own experiments, research, and documentation.
 
 ---
 
@@ -16,4 +16,4 @@ You are free to:
 - Share — copy and redistribute the material in any medium or format
 - Adapt — remix, transform, and build upon the material
 
-**As long as you give appropriate credit** to the original work (linux1st.com and this repository).
+**As long as you give appropriate credit** to the original work (linux1st.com, LPI and this repository).
